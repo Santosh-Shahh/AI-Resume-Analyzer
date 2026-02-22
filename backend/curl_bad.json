@@ -1,0 +1,4 @@
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   580  100   140  100   440    853   2683 --:--:-- --:--:-- --:--:--  3558
+{"message":"Analysis service unavailable. Make sure the NLP service is running on port 8001.","error":"Request failed with status code 500"}

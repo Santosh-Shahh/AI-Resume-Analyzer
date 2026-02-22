@@ -10,15 +10,20 @@ const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors({
-    origin: '*', // Allow all origins for development
-    methods: ['GET', 'POST'],
-    allowedHeaders: ['Content-Type']
+    origin: '*',
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(express.json());
 
 // Routes
 const uploadRoute = require('./routes/upload');
+const authRoute = require('./routes/auth');
+const dashboardRoute = require('./routes/dashboard');
+
 app.use('/api/upload', uploadRoute);
+app.use('/api/auth', authRoute);
+app.use('/api/dashboard', dashboardRoute);
 
 // MongoDB Connection
 mongoose.connect(process.env.MONGO_URI)

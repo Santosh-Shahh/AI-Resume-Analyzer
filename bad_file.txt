@@ -1,0 +1,2 @@
+This is not a PDF. This is a text file masquerading as a resume.
+It should be rejected or handled gracefully.

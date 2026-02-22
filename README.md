@@ -105,17 +105,120 @@ The application will be available at:
 
 ## ⚙️ Configuration
 
-### Backend (.env)
+### Backend Environment Variables
+
+Create a `.env` file in the `backend/` directory:
+
 ```env
-PORT=5000
+PORT=5001
 MONGO_URI=mongodb://localhost:27017/resume_analyzer
-NLP_SERVICE_URL=http://localhost:8001
+NLP_SERVICE_URL=http://127.0.0.1:8001
+JWT_SECRET=resume_analyzer_jwt_secret_2026
+FRONTEND_URL=http://localhost:5173
+
+# OAuth Configuration (optional)
+GOOGLE_CLIENT_ID=
+GITHUB_CLIENT_ID=
+GITHUB_CLIENT_SECRET=
+LINKEDIN_CLIENT_ID=
+LINKEDIN_CLIENT_SECRET=
 ```
 
-### API Keys (Optional)
-To enable AI-powered suggestions, add your API key:
-- OpenAI: Set `OPENAI_API_KEY` in `nlp_service/.env`
-- Gemini: Set `GEMINI_API_KEY` in `nlp_service/.env`
+### Frontend Environment Variables
+
+Create a `.env` file in the `frontend/` directory:
+
+```env
+VITE_GOOGLE_CLIENT_ID=
+```
+
+### OAuth Setup (Optional)
+
+The application supports multiple authentication methods:
+- **Email/Password** (always available)
+- **Google OAuth** (requires setup)
+- **GitHub OAuth** (requires setup)
+- **LinkedIn OAuth** (requires setup)
+
+#### Google OAuth Setup
+
+1. **Go to Google Cloud Console**
+   - Visit: https://console.cloud.google.com/apis/credentials
+   - Create a new project or select an existing one
+
+2. **Configure OAuth Consent Screen**
+   - Click "OAuth consent screen" in the left sidebar
+   - Select "External" user type
+   - Fill in required fields:
+     - App name: `AI Resume Analyzer`
+     - User support email: Your email
+     - Developer contact: Your email
+   - Click "Save and Continue"
+
+3. **Create OAuth 2.0 Client ID**
+   - Click "Credentials" in the left sidebar
+   - Click "+ CREATE CREDENTIALS" → "OAuth client ID"
+   - Application type: "Web application"
+   - Name: `AI Resume Analyzer - Web`
+   - Authorized JavaScript origins:
+     - `http://localhost:5173`
+     - `http://127.0.0.1:5173`
+   - Authorized redirect URIs:
+     - `http://localhost:5173`
+   - Click "Create"
+
+4. **Copy and Configure**
+   - Copy the generated Client ID
+   - Paste it in `frontend/.env`:
+     ```env
+     VITE_GOOGLE_CLIENT_ID=your-client-id-here.apps.googleusercontent.com
+     ```
+   - **Restart the frontend server** for changes to take effect
+
+#### GitHub OAuth Setup
+
+1. **Go to GitHub Settings**
+   - Visit: https://github.com/settings/developers
+   - Click "New OAuth App"
+
+2. **Register Application**
+   - Application name: `AI Resume Analyzer`
+   - Homepage URL: `http://localhost:5173`
+   - Authorization callback URL: `http://localhost:5001/api/auth/github/callback`
+   - Click "Register application"
+
+3. **Copy Credentials**
+   - Copy the Client ID
+   - Generate a new client secret
+   - Add to `backend/.env`:
+     ```env
+     GITHUB_CLIENT_ID=your-client-id
+     GITHUB_CLIENT_SECRET=your-client-secret
+     ```
+
+#### LinkedIn OAuth Setup
+
+1. **Go to LinkedIn Developers**
+   - Visit: https://www.linkedin.com/developers/apps
+   - Click "Create app"
+
+2. **Create Application**
+   - App name: `AI Resume Analyzer`
+   - Company: Your company/name
+   - Logo: Upload a logo (optional)
+   - Accept the terms and create
+
+3. **Configure Auth**
+   - In the "Auth" tab, add redirect URLs:
+     - `http://localhost:5001/api/auth/linkedin/callback`
+   - Copy Client ID and Client Secret
+   - Add to `backend/.env`:
+     ```env
+     LINKEDIN_CLIENT_ID=your-client-id
+     LINKEDIN_CLIENT_SECRET=your-client-secret
+     ```
+
+> **Note**: OAuth is optional. The app works without it using email/password authentication.
 
 ## 📁 Project Structure
 

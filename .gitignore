@@ -1,0 +1,40 @@
+# Dependencies
+node_modules/
+.venv/
+venv/
+nlp_service/venv/
+__pycache__/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+frontend/.env
+
+# Build output
+dist/
+build/
+
+# Uploads (user data)
+backend/uploads/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Test files
+test_resume.txt
+dummy_resume.pdf
+VERIFICATION_REPORT.md
+
+# Misc
+*.pyc
+.gemini/

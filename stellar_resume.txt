@@ -1,0 +1,23 @@
+Jane Doe
+Senior Software Engineer
+janedoe@example.com | (555) 123-4567 | github.com/janedoe
+
+SUMMARY
+Results-oriented Senior Software Engineer with 8+ years of experience in full-stack development. Proven track record of scaling web applications to support 1M+ active users. Expert in Python, React, and Cloud Architecture.
+
+EXPERIENCE
+Tech Solutions Inc. | Senior Software Engineer | 2018 - Present
+- Led the migration of a monolithic architecture to microservices using Docker and Kubernetes, reducing deployment time by 60%.
+- Optimized database queries and indexed MongoDB collections, resulting in a 40% decrease in page load times.
+- Mentored a team of 5 junior developers, conducting code reviews and implementing TDD practices that reduced production bugs by 25%.
+- Architected a real-time analytics dashboard using React and WebSocket, processing 500k events/second.
+
+Innovate Corp | Software Developer | 2015 - 2018
+- Developed and maintained a customer-facing e-commerce platform using Django and PostgreSQL, generating $2M in annual revenue.
+- Implemented a CI/CD pipeline with Jenkins, automating testing and deployment processes.
+- Collaborated with product managers to define requirements and deliver features ahead of schedule.
+
+SKILLS
+- Languages: Python, JavaScript, TypeScript, SQL, Go
+- Frameworks: React, Django, Flask, FastAPI, Next.js
+- Tools: Docker, Kubernetes, AWS (EC2, S3, RDS), Git, Jenkins, Terraform
