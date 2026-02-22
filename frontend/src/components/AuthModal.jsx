@@ -25,7 +25,7 @@ const LinkedInIcon = () => (
     </svg>
 );
 
-const API_URL = 'http://localhost:5001/api/auth';
+const API_URL = '/api/auth';
 
 // Isolated component for Google Login to prevent hook order violations in parent
 const GoogleLoginButton = ({ onLogin, loading, setLoading, setError }) => {

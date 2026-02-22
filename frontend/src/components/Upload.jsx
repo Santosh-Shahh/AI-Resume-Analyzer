@@ -27,7 +27,7 @@ const Upload = ({ setAnalysisResult }) => {
                 headers['Authorization'] = `Bearer ${token}`;
             }
 
-            const response = await axios.post('http://localhost:5001/api/upload', formData, { headers });
+            const response = await axios.post('/api/upload', formData, { headers });
 
             const analysis = response.data?.analysis;
             const resumeId = response.data?.resumeId;
