@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { X, Mail, Lock, User, Loader2, AlertCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { useGoogleLogin } from '@react-oauth/google';
+import { GoogleLogin } from '@react-oauth/google';
 import api from '../api';
 
 // SVG icons for social providers
@@ -28,65 +28,32 @@ const LinkedInIcon = () => (
 
 const API_URL = '/api/auth';
 
-// Isolated component for Google Login to prevent hook order violations in parent
-const GoogleLoginButton = ({ onLogin, loading, setLoading, setError }) => {
-    const handleGoogleLogin = useGoogleLogin({
-        flow: 'implicit',
-        onSuccess: async (tokenResponse) => {
-            setLoading('google');
-            setError('');
-            try {
-                // Get user info from Google with the access token
-                const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-                    headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
-                });
-                const profile = await res.json();
-
-                // Send to backend
-                await onLogin(tokenResponse.access_token, profile);
-            } catch (err) {
-                setError(err.message || 'Google sign-in failed.');
-            } finally {
-                setLoading('');
-            }
-        },
-        onError: () => {
-            setError('Google sign-in was cancelled or failed.');
-            setLoading('');
-        },
-    });
-
+// Isolated component for Google Login using ID token (credential) flow
+// This flow only needs Authorized JavaScript Origins — no redirect URIs required
+const GoogleLoginButton = ({ onLogin, setLoading, setError }) => {
     return (
-        <button
-            onClick={() => handleGoogleLogin()}
-            disabled={!!loading}
-            style={{
-                width: '100%',
-                padding: '12px',
-                borderRadius: 10,
-                border: '1.5px solid #e2e8f0',
-                background: '#fff',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 10,
-                fontSize: 14,
-                fontWeight: 600,
-                color: '#374151',
-                transition: 'all 0.2s ease',
-                opacity: loading === 'google' ? 0.7 : 1,
+        <GoogleLogin
+            onSuccess={async (credentialResponse) => {
+                setLoading('google');
+                setError('');
+                try {
+                    await onLogin(credentialResponse.credential);
+                } catch (err) {
+                    setError(err.message || 'Google sign-in failed.');
+                } finally {
+                    setLoading('');
+                }
             }}
-            onMouseEnter={(e) => { e.target.style.background = '#f8fafc'; e.target.style.borderColor = '#cbd5e1'; }}
-            onMouseLeave={(e) => { e.target.style.background = '#fff'; e.target.style.borderColor = '#e2e8f0'; }}
-        >
-            {loading === 'google' ? (
-                <Loader2 size={18} style={{ animation: 'spin 1s linear infinite' }} />
-            ) : (
-                <GoogleIcon />
-            )}
-            Continue with Google
-        </button>
+            onError={() => {
+                setError('Google sign-in was cancelled or failed.');
+                setLoading('');
+            }}
+            width="100%"
+            text="continue_with"
+            shape="rectangular"
+            theme="outline"
+            size="large"
+        />
     );
 };
 
@@ -103,12 +70,9 @@ const AuthModal = ({ isOpen, onClose }) => {
     // Early return is safe here because AuthModal has no conditional hooks (useState/useAuth are consistent)
     if (!isOpen) return null;
 
-    const onGoogleBackendLogin = async (accessToken, profile) => {
+    const onGoogleBackendLogin = async (credential) => {
         try {
-            const res = await api.post(`${API_URL}/google`, {
-                credential: accessToken,
-                profile,
-            });
+            const res = await api.post(`${API_URL}/google`, { credential });
             localStorage.setItem('token', res.data.token);
             window.location.reload();
         } catch (err) {
@@ -370,7 +334,6 @@ const AuthModal = ({ isOpen, onClose }) => {
                             {import.meta.env.VITE_GOOGLE_CLIENT_ID ? (
                                 <GoogleLoginButton
                                     onLogin={onGoogleBackendLogin}
-                                    loading={socialLoading}
                                     setLoading={setSocialLoading}
                                     setError={setError}
                                 />
