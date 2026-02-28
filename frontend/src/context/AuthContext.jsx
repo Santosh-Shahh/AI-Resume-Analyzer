@@ -1,9 +1,10 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../api';
 
 const AuthContext = createContext(null);
 
 const API_URL = '/api/auth';
+
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
@@ -13,7 +14,7 @@ export const AuthProvider = ({ children }) => {
     // Helper: set auth state from token
     const setAuthFromToken = async (newToken) => {
         try {
-            const res = await axios.get(`${API_URL}/me`, {
+            const res = await api.get(`${API_URL}/me`, {
                 headers: { Authorization: `Bearer ${newToken}` }
             });
             localStorage.setItem('token', newToken);
@@ -60,7 +61,7 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     const login = async (email, password) => {
-        const res = await axios.post(`${API_URL}/login`, { email, password });
+        const res = await api.post(`${API_URL}/login`, { email, password });
         const { token: newToken, user: userData } = res.data;
         localStorage.setItem('token', newToken);
         setToken(newToken);
@@ -69,7 +70,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     const register = async (name, email, password) => {
-        const res = await axios.post(`${API_URL}/register`, { name, email, password });
+        const res = await api.post(`${API_URL}/register`, { name, email, password });
         const { token: newToken, user: userData } = res.data;
         localStorage.setItem('token', newToken);
         setToken(newToken);
@@ -79,7 +80,7 @@ export const AuthProvider = ({ children }) => {
 
     // Google social login — sends credential to backend for verification
     const googleLogin = async (credential) => {
-        const res = await axios.post(`${API_URL}/google`, { credential });
+        const res = await api.post(`${API_URL}/google`, { credential });
         const { token: newToken, user: userData } = res.data;
         localStorage.setItem('token', newToken);
         setToken(newToken);

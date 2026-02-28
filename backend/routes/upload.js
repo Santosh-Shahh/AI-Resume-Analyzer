@@ -3,6 +3,7 @@ const router = express.Router();
 const multer = require('multer');
 const Resume = require('../models/Resume');
 const path = require('path');
+const fs = require('fs');
 const axios = require('axios');
 const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
@@ -48,10 +49,16 @@ router.post('/', upload.single('resume'), async (req, res) => {
         let resumeId = new mongoose.Types.ObjectId();
 
         // Call NLP service for real analysis
+        // Read file into memory and send as base64 so NLP service
+        // can run on a different server (cloud deployment)
         let analysis = null;
         try {
+            const fileBuffer = fs.readFileSync(req.file.path);
+            const fileBase64 = fileBuffer.toString('base64');
+
             const nlpResponse = await axios.post(`${process.env.NLP_SERVICE_URL}/analyze`, {
-                filePath: path.resolve(req.file.path),
+                fileContent: fileBase64,
+                fileName: req.file.originalname,
                 jobDescription: jobDescription || ''
             }, { timeout: 60000 });
 
@@ -59,9 +66,8 @@ router.post('/', upload.single('resume'), async (req, res) => {
             console.log(`NLP analysis complete. Score: ${analysis.score}`);
         } catch (nlpError) {
             console.error('NLP service error:', nlpError.message);
-            // Return error to frontend so it knows analysis failed
             return res.status(503).json({
-                message: 'Analysis service unavailable. Make sure the NLP service is running on port 8001.',
+                message: 'Analysis service unavailable. Please try again later.',
                 error: nlpError.message
             });
         }

@@ -1,0 +1,13 @@
+{
+    "venvPath": "..",
+    "venv": ".venv",
+    "pythonVersion": "3.11",
+    "include": [
+        "nlp_service"
+    ],
+    "exclude": [
+        "**/__pycache__",
+        "**/.venv",
+        "**/venv"
+    ]
+}

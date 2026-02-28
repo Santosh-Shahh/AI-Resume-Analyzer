@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { UploadCloud, CheckCircle, Shield, Zap, FileText, Briefcase, ChevronDown, ChevronUp } from 'lucide-react';
-import axios from 'axios';
+import api from '../api';
 import { useAuth } from '../context/AuthContext';
 
 const Upload = ({ setAnalysisResult }) => {
@@ -27,7 +27,7 @@ const Upload = ({ setAnalysisResult }) => {
                 headers['Authorization'] = `Bearer ${token}`;
             }
 
-            const response = await axios.post('/api/upload', formData, { headers });
+            const response = await api.post('/api/upload', formData, { headers });
 
             const analysis = response.data?.analysis;
             const resumeId = response.data?.resumeId;

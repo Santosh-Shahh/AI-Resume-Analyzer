@@ -1,0 +1,17 @@
+{
+    "venvPath": ".",
+    "venv": ".venv",
+    "pythonVersion": "3.11",
+    "pythonPlatform": "Darwin",
+    "include": [
+        "nlp_service"
+    ],
+    "exclude": [
+        ".venv",
+        "nlp_service/venv",
+        "**/__pycache__",
+        "**/node_modules"
+    ],
+    "reportMissingImports": false,
+    "reportMissingModuleSource": false
+}

@@ -5,7 +5,7 @@ import {
     LayoutDashboard, FileText, TrendingUp, Clock, BarChart3,
     ArrowUpRight, ArrowDownRight, Calendar, Award
 } from 'lucide-react';
-import axios from 'axios';
+import api from '../api';
 
 const Dashboard = () => {
     const { user, token } = useAuth();
@@ -17,7 +17,7 @@ const Dashboard = () => {
     useEffect(() => {
         const fetchDashboard = async () => {
             try {
-                const res = await axios.get('/api/dashboard', {
+                const res = await api.get('/api/dashboard', {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 setData(res.data);

@@ -2,17 +2,19 @@ import os
 import re
 import json
 import time
+import base64
 import hashlib
 import logging
+import tempfile
 from pathlib import Path
 from functools import lru_cache
-from flask import Flask, request, jsonify
-from flask_cors import CORS
-from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
-from PyPDF2 import PdfReader
-from groq import Groq
-from dotenv import load_dotenv
+from flask import Flask, request, jsonify  # type: ignore[import]
+from flask_cors import CORS  # type: ignore[import]
+from flask_limiter import Limiter  # type: ignore[import]
+from flask_limiter.util import get_remote_address  # type: ignore[import]
+from PyPDF2 import PdfReader  # type: ignore[import]
+from groq import Groq  # type: ignore[import]
+from dotenv import load_dotenv  # type: ignore[import]
 
 # ─── Setup ────────────────────────────────────────────────────────────────────
 
@@ -49,17 +51,6 @@ MODEL = "llama-3.3-70b-versatile"
 def extract_text(file_path: str) -> str:
     """Extract and clean text from PDF or TXT file."""
     path = Path(file_path).resolve()
-
-    # Security: prevent path traversal — allow /tmp and the backend uploads dir
-    allowed_dirs = [
-        Path("/tmp").resolve(),
-        Path(os.getenv(
-            "ALLOWED_UPLOAD_DIR",
-            str(Path(__file__).parent.parent / "backend" / "uploads")
-        )).resolve(),
-    ]
-    if not any(path.is_relative_to(d) for d in allowed_dirs):
-        raise PermissionError(f"Access denied: {file_path}")
 
     if not path.exists():
         raise FileNotFoundError(f"File not found: {file_path}")
@@ -246,8 +237,8 @@ OUTPUT: Return a single valid JSON object matching this schema exactly. No markd
 """
 
 def build_user_prompt(resume_text: str, job_description: str) -> str:
-    resume_snippet = resume_text[:12000]
-    jd_snippet = job_description[:4000] if job_description.strip() else "Not provided. Perform general analysis based on inferred target role."
+    resume_snippet = resume_text[:12000]  # type: ignore[index]
+    jd_snippet = job_description[:4000] if job_description.strip() else "Not provided. Perform general analysis based on inferred target role."  # type: ignore[index]
 
     return f"""
 --- RESUME TEXT START ---
@@ -268,7 +259,7 @@ Now execute the chain-of-thought steps and return the JSON analysis.
 _analysis_cache: dict[tuple, dict] = {}
 
 def _hash(text: str) -> str:
-    return hashlib.sha256(text.encode()).hexdigest()[:16]
+    return hashlib.sha256(text.encode()).hexdigest()[:16]  # type: ignore[index]
 
 
 def analyze_with_ai(resume_text: str, job_description: str = "") -> dict:
@@ -404,18 +395,34 @@ def analyze_resume():
     if not data:
         return jsonify({"error": "Request body must be valid JSON."}), 400
 
-    file_path = data.get("filePath", "").strip()
+    file_content_b64 = data.get("fileContent", "").strip()
+    file_name = data.get("fileName", "resume.pdf").strip()
     job_description = data.get("jobDescription", "").strip()
 
-    if not file_path:
-        return jsonify({"error": "filePath is required."}), 400
+    if not file_content_b64:
+        return jsonify({"error": "fileContent (base64) is required."}), 400
 
-    logger.info(f"Analyze request: file={file_path}, jd_provided={bool(job_description)}")
+    logger.info(f"Analyze request: file={file_name}, jd_provided={bool(job_description)}")
+
+    # Decode base64 content into a temporary file
+    tmp_path = None
+    try:
+        file_bytes = base64.b64decode(file_content_b64)
+        suffix = Path(file_name).suffix.lower() or ".pdf"
+        if suffix not in (".pdf", ".txt"):
+            return jsonify({"error": f"Unsupported file type: {suffix}. Only .pdf and .txt are supported."}), 415
+
+        with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp:
+            tmp.write(file_bytes)
+            tmp_path = tmp.name
+
+        logger.info(f"Wrote temp file: {tmp_path} ({len(file_bytes)} bytes)")
+    except Exception as e:
+        logger.error(f"Failed to decode file content: {e}")
+        return jsonify({"error": "Failed to decode file content. Ensure it is valid base64."}), 400
 
     try:
-        resume_text = extract_text(file_path)
-    except PermissionError as e:
-        return jsonify({"error": str(e)}), 403
+        resume_text = extract_text(tmp_path)
     except FileNotFoundError as e:
         return jsonify({"error": str(e)}), 404
     except ValueError as e:
@@ -423,6 +430,13 @@ def analyze_resume():
     except Exception as e:
         logger.exception("Unexpected error during text extraction")
         return jsonify({"error": "Failed to extract text from file."}), 500
+    finally:
+        # Always clean up temp file
+        if tmp_path and os.path.exists(tmp_path):
+            try:
+                os.unlink(tmp_path)
+            except Exception:
+                pass
 
     if len(resume_text.strip()) < 100:
         return jsonify({"error": "Resume text is too short to analyze. Check the file contents."}), 422
