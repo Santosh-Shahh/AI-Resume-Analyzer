@@ -1,305 +1,161 @@
 # AI Resume Analyzer
 
-A full-stack web application that analyzes resumes against job descriptions using AI to provide ATS scores, keyword matching, and improvement suggestions.
+A full-stack web application that acts as an AI Applicant Tracking System (ATS). It analyzes PDF resumes against job descriptions using Natural Language Processing (via the Groq API) to provide ATS scores, keyword matching, and actionable improvement suggestions.
+
+![AI Resume Analyzer Demo](https://ai-resume-analyzer-gamma-smoky.vercel.app/og-image.png)
+
+## 🌐 Live Demo
+- **Frontend**: [https://ai-resume-analyzer-gamma-smoky.vercel.app](https://ai-resume-analyzer-gamma-smoky.vercel.app)
+- **Backend (API)**: [https://ai-resume-analyzer-1-wng2.onrender.com](https://ai-resume-analyzer-1-wng2.onrender.com)
+- **NLP Service**: [https://ai-resume-analyzer-r3r8.onrender.com](https://ai-resume-analyzer-r3r8.onrender.com)
 
 ## 🚀 Features
 
-- **Resume Upload**: Drag-and-drop PDF resume upload
-- **Job Matching**: Compare resume against job descriptions
-- **ATS Scoring**: Calculate applicant tracking system compatibility score
-- **Keyword Analysis**: Identify matched and missing keywords
-- **AI Suggestions**: Get improvement recommendations (OpenAI/Gemini integration ready)
+- **Resume Upload**: Fast PDF extraction and processing.
+- **Job Matching**: Intelligent comparison of resume content against provided Job Descriptions.
+- **ATS Scoring**: Accurate "Resume Health" score out of 100 based on keyword density and relevance.
+- **Keyword Analysis**: Visual breakdown of matched vs. missing keywords.
+- **AI Suggestions**: Detailed feedback on how to improve the resume using Llama-3 via the Groq API.
+- **Secure Authentication**: Traditional Email/Password (bcrypt hashed) + Google Sign-In (Credential Flow).
+- **History Tracking**: All previous resume uploads and scores are saved to the user's dashboard.
 
 ## 🏗️ Architecture
+
+The application is built using a modern microservices architecture, separating front-end rendering, core API logic, and heavy AI workloads.
 
 ```
 ┌─────────────┐      ┌─────────────┐      ┌─────────────┐
 │   React     │◄────►│   Node.js   │◄────►│   Python    │
-│  Frontend   │      │   Backend   │      │ NLP Service │
-│  (Port 5173)│      │ (Port 5000) │      │ (Port 8001) │
+│  Frontend   │ REST │   Backend   │ HTTP │ NLP Service │
+│  (Vercel)   │      │  (Render)   │      │  (Render)   │
 └─────────────┘      └──────┬──────┘      └─────────────┘
                             │
                       ┌─────▼─────┐
                       │  MongoDB  │
-                      │           │
+                      │  (Atlas)  │
                       └───────────┘
 ```
 
 ## 📦 Tech Stack
 
-### Frontend
-- React 19 with Vite
-- Tailwind CSS for styling
-- Axios for API calls
-- React Dropzone for file uploads
+### Frontend (`frontend/`)
+- **React 18** with Vite
+- **Tailwind CSS** for UI styling
+- **Axios** (Centralized API client)
+- **@react-oauth/google** (Google Sign-In Credential Flow)
+- Deployed on **Vercel**
 
-### Backend
-- Node.js with Express
-- Multer for file handling
-- Mongoose for MongoDB
-- CORS enabled
+### Backend (`backend/`)
+- **Node.js** & **Express**
+- **MongoDB** via Mongoose (Deployed on MongoDB Atlas)
+- **Multer** (Memory storage for file uploads)
+- **JWT** (JSON Web Tokens for session management)
+- **Nodemailer** (SMTP integration for Password Reset)
+- Deployed on **Render** (Web Service)
 
-### NLP Service
-- Python Flask
-- PyPDF2 for text extraction
-- OpenAI/Gemini API ready
+### NLP Service (`nlp_service/`)
+- **Python 3.11** & **Flask**
+- **PyPDF2** (PDF text extraction)
+- **Groq API** (Llama 3 8B model for fast NLP analysis)
+- **Gunicorn** (Production WSGI server)
+- Deployed on **Render** (Web Service)
 
-## 🛠️ Installation
+## 🛠️ Local Development Setup
 
 ### Prerequisites
-- Node.js (v16+)
-- Python (v3.8+)
-- MongoDB (optional, app works without it)
+- Node.js (v18+)
+- Python (v3.10+)
+- MongoDB connection string (Atlas or Local)
+- Groq API Key
 
-### Setup
+### 1. Clone the repository
+```bash
+git clone https://github.com/Santosh-Shahh/AI-Resume-Analyzer.git
+cd AI-Resume-Analyzer
+```
 
-1. **Clone the repository**
-   ```bash
-   git clone <your-repo>
-   cd Resume
-   ```
-
-2. **Backend Setup**
-   ```bash
-   cd backend
-   npm install
-   cp .env.example .env  # Configure your environment variables
-   ```
-
-3. **Frontend Setup**
-   ```bash
-   cd frontend
-   npm install
-   ```
-
-4. **NLP Service Setup**
-   ```bash
-   cd nlp_service
-   pip install -r requirements.txt
-   ```
-
-## 🚦 Running the Application
-
-### Start Backend
+### 2. Backend Setup (Node.js)
 ```bash
 cd backend
+npm install
+```
+Create a `.env` file in `backend/`:
+```env
+PORT=5001
+MONGO_URI=your_mongodb_connection_string
+JWT_SECRET=your_jwt_secret
+FRONTEND_URL=http://localhost:5173
+NLP_SERVICE_URL=http://127.0.0.1:8001
+GOOGLE_CLIENT_ID=your_google_client_id
+
+# Optional: For Password Reset
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_EMAIL=your_email@gmail.com
+SMTP_PASSWORD=your_app_password
+```
+Run the backend:
+```bash
 npm start
 ```
 
-### Start NLP Service
+### 3. NLP Service Setup (Python)
+Open a new terminal:
 ```bash
 cd nlp_service
-python app.py
+python3 -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+```
+Create a `.env` file in `nlp_service/`:
+```env
+GROQ_API_KEY=your_groq_api_key
+```
+Run the Python service:
+```bash
+flask run --port=8001
 ```
 
-### Start Frontend
+### 4. Frontend Setup (React/Vite)
+Open a third terminal:
 ```bash
 cd frontend
+npm install
+```
+Create a `.env.local` file in `frontend/`:
+```env
+# Point to the local backend during development
+VITE_API_URL=http://localhost:5001
+VITE_GOOGLE_CLIENT_ID=your_google_client_id
+```
+Start the Vite dev server:
+```bash
 npm run dev
 ```
 
-The application will be available at:
-- **Frontend**: http://localhost:5173
-- **Backend**: http://localhost:5000
-- **NLP Service**: http://localhost:8001
+## 🔐 Google OAuth Configuration (ID Token Flow)
 
-## ⚙️ Configuration
+Unlike the implicit flow, the Credential/ID Token flow used in this project does **NOT** require configuring authorized redirect URIs. 
 
-### Backend Environment Variables
+1. Go to the [Google Cloud Console](https://console.cloud.google.com/).
+2. Create/Select your project and go to **APIs & Services > Credentials**.
+3. Create an **OAuth 2.0 Client ID** (Type: Web application).
+4. Add your **Authorized JavaScript Origins**:
+   - `http://localhost:5173` (Local dev)
+   - `https://ai-resume-analyzer-gamma-smoky.vercel.app` (Production)
+5. Save the generated Client ID and add it to your `.env` files (`backend/.env` and `frontend/.env.production`).
 
-Create a `.env` file in the `backend/` directory:
+## ☁️ Deployment Strategy
 
-```env
-PORT=5001
-MONGO_URI=mongodb://localhost:27017/resume_analyzer
-NLP_SERVICE_URL=http://127.0.0.1:8001
-JWT_SECRET=resume_analyzer_jwt_secret_2026
-FRONTEND_URL=http://localhost:5173
-
-# OAuth Configuration (optional)
-GOOGLE_CLIENT_ID=
-GITHUB_CLIENT_ID=
-GITHUB_CLIENT_SECRET=
-LINKEDIN_CLIENT_ID=
-LINKEDIN_CLIENT_SECRET=
-```
-
-### Frontend Environment Variables
-
-Create a `.env` file in the `frontend/` directory:
-
-```env
-VITE_GOOGLE_CLIENT_ID=
-```
-
-### OAuth Setup (Optional)
-
-The application supports multiple authentication methods:
-- **Email/Password** (always available)
-- **Google OAuth** (requires setup)
-- **GitHub OAuth** (requires setup)
-- **LinkedIn OAuth** (requires setup)
-
-#### Google OAuth Setup
-
-1. **Go to Google Cloud Console**
-   - Visit: https://console.cloud.google.com/apis/credentials
-   - Create a new project or select an existing one
-
-2. **Configure OAuth Consent Screen**
-   - Click "OAuth consent screen" in the left sidebar
-   - Select "External" user type
-   - Fill in required fields:
-     - App name: `AI Resume Analyzer`
-     - User support email: Your email
-     - Developer contact: Your email
-   - Click "Save and Continue"
-
-3. **Create OAuth 2.0 Client ID**
-   - Click "Credentials" in the left sidebar
-   - Click "+ CREATE CREDENTIALS" → "OAuth client ID"
-   - Application type: "Web application"
-   - Name: `AI Resume Analyzer - Web`
-   - Authorized JavaScript origins:
-     - `http://localhost:5173`
-     - `http://127.0.0.1:5173`
-   - Authorized redirect URIs:
-     - `http://localhost:5173`
-   - Click "Create"
-
-4. **Copy and Configure**
-   - Copy the generated Client ID
-   - Paste it in `frontend/.env`:
-     ```env
-     VITE_GOOGLE_CLIENT_ID=your-client-id-here.apps.googleusercontent.com
-     ```
-   - **Restart the frontend server** for changes to take effect
-
-#### GitHub OAuth Setup
-
-1. **Go to GitHub Settings**
-   - Visit: https://github.com/settings/developers
-   - Click "New OAuth App"
-
-2. **Register Application**
-   - Application name: `AI Resume Analyzer`
-   - Homepage URL: `http://localhost:5173`
-   - Authorization callback URL: `http://localhost:5001/api/auth/github/callback`
-   - Click "Register application"
-
-3. **Copy Credentials**
-   - Copy the Client ID
-   - Generate a new client secret
-   - Add to `backend/.env`:
-     ```env
-     GITHUB_CLIENT_ID=your-client-id
-     GITHUB_CLIENT_SECRET=your-client-secret
-     ```
-
-#### LinkedIn OAuth Setup
-
-1. **Go to LinkedIn Developers**
-   - Visit: https://www.linkedin.com/developers/apps
-   - Click "Create app"
-
-2. **Create Application**
-   - App name: `AI Resume Analyzer`
-   - Company: Your company/name
-   - Logo: Upload a logo (optional)
-   - Accept the terms and create
-
-3. **Configure Auth**
-   - In the "Auth" tab, add redirect URLs:
-     - `http://localhost:5001/api/auth/linkedin/callback`
-   - Copy Client ID and Client Secret
-   - Add to `backend/.env`:
-     ```env
-     LINKEDIN_CLIENT_ID=your-client-id
-     LINKEDIN_CLIENT_SECRET=your-client-secret
-     ```
-
-> **Note**: OAuth is optional. The app works without it using email/password authentication.
-
-## 📁 Project Structure
-
-```
-Resume/
-├── backend/
-│   ├── models/          # Mongoose schemas
-│   ├── routes/          # Express routes
-│   ├── uploads/         # Uploaded files
-│   ├── server.js        # Main server file
-│   └── .env
-├── frontend/
-│   ├── src/
-│   │   ├── components/  # React components
-│   │   ├── App.jsx
-│   │   └── index.css
-│   └── package.json
-└── nlp_service/
-    ├── app.py           # Flask server
-    └── requirements.txt
-```
-
-## 🧪 Testing
-
-1. Open http://localhost:5173
-2. Enter a job description
-3. Upload a resume PDF
-4. View the analysis results
-
-## 📝 API Endpoints
-
-### POST /api/upload
-Upload a resume and get analysis
-
-**Request:**
-- `resume`: PDF file (multipart/form-data)
-- `jobDescription`: String
-
-**Response:**
-```json
-{
-  "message": "Resume uploaded successfully",
-  "resumeId": "..."
-}
-```
-
-## 🚀 Deployment
-
-### Frontend (Vercel/Netlify)
-```bash
-cd frontend
-npm run build
-# Deploy the dist/ folder
-```
-
-### Backend (Heroku/Railway)
-```bash
-cd backend
-# Push to your platform
-```
-
-### NLP Service (Docker)
-```dockerfile
-FROM python:3.11
-WORKDIR /app
-COPY requirements.txt .
-RUN pip install -r requirements.txt
-COPY . .
-CMD ["python", "app.py"]
-```
-
-## 🐛 Known Issues
-
-- MongoDB connection is optional - app runs without database
-- File upload works via CORS (configured for all origins in development)
-- NLP analysis uses mock data until API keys are configured
+This project handles file uploads in a serverless/cloud environment using **Base64 encoding**:
+1. User uploads a PDF to React (Vercel).
+2. React posts the file to Node.js (Render) `upload.js` via `multipart/form-data`.
+3. Node.js intercepts the file into a pure RAM memory buffer.
+4. Node.js converts the buffer to a Base64 string and posts it via HTTP to the Python microservice (Render).
+5. Python decodes the Base64 back into a PDF, runs extraction, requests the Groq LLM, and returns the JSON analysis.
 
 ## 📄 License
-
 MIT
 
 ## 👤 Author
-
-Your Name
+Santosh Shah
