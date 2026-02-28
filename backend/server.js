@@ -9,12 +9,21 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware
+const allowedOrigins = [
+    process.env.FRONTEND_URL,
+    'http://localhost:5173',
+    'http://localhost:3000',
+];
 app.use(cors({
-    origin: [
-        process.env.FRONTEND_URL || 'http://localhost:5173',
-        'http://localhost:5173',
-        'http://localhost:3000'
-    ],
+    origin: (origin, callback) => {
+        // Allow requests with no origin (e.g. mobile apps, curl)
+        if (!origin) return callback(null, true);
+        // Allow any vercel.app subdomain or explicitly listed origin
+        if (allowedOrigins.includes(origin) || /\.vercel\.app$/.test(origin)) {
+            return callback(null, true);
+        }
+        callback(new Error(`CORS blocked: ${origin}`));
+    },
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
