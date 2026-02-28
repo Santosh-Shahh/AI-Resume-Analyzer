@@ -39,3 +39,4 @@ VERIFICATION_REPORT.md
 # Misc
 *.pyc
 .gemini/
+.vercel
