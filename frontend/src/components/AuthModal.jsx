@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { X, Mail, Lock, User, Loader2, AlertCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useGoogleLogin } from '@react-oauth/google';
+import api from '../api';
 
 // SVG icons for social providers
 const GoogleIcon = () => (
@@ -104,25 +105,15 @@ const AuthModal = ({ isOpen, onClose }) => {
 
     const onGoogleBackendLogin = async (accessToken, profile) => {
         try {
-            const backendRes = await fetch(`${API_URL}/google`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    credential: accessToken,
-                    profile,
-                }),
+            const res = await api.post(`${API_URL}/google`, {
+                credential: accessToken,
+                profile,
             });
-
-            if (!backendRes.ok) {
-                const errData = await backendRes.json();
-                throw new Error(errData.message || 'Google sign-in failed');
-            }
-
-            const data = await backendRes.json();
-            localStorage.setItem('token', data.token);
+            localStorage.setItem('token', res.data.token);
             window.location.reload();
         } catch (err) {
-            setError(err.message || 'Google sign-in failed.');
+            const msg = err.response?.data?.message || err.message || 'Google sign-in failed.';
+            setError(msg);
             setSocialLoading('');
         }
     };
@@ -189,24 +180,15 @@ const AuthModal = ({ isOpen, onClose }) => {
         setError('');
         setLoading(true);
         try {
-            const res = await fetch(`${API_URL}/forgot-password`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email }),
-            });
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.message || 'Something went wrong');
-            if (data.devLink) {
-                // DEV MODE: Show link directly
-                alert(`DEV MODE: Password reset link (normally sent via email):\n\n${data.devLink}`);
-                // Optional: Open directly for convenience
-                // window.open(data.devLink, '_blank');
+            const res = await api.post(`${API_URL}/forgot-password`, { email });
+            if (res.data.devLink) {
+                alert(`DEV MODE: Password reset link (normally sent via email):\n\n${res.data.devLink}`);
             } else {
                 alert('Password reset link sent to your email.');
             }
             setMode('login');
         } catch (err) {
-            setError(err.message);
+            setError(err.response?.data?.message || err.message || 'Something went wrong');
         } finally {
             setLoading(false);
         }
