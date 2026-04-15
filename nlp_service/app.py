@@ -13,6 +13,7 @@ from flask_cors import CORS  # type: ignore[import]
 from flask_limiter import Limiter  # type: ignore[import]
 from flask_limiter.util import get_remote_address  # type: ignore[import]
 from PyPDF2 import PdfReader  # type: ignore[import]
+from docx import Document  # type: ignore[import]
 from groq import Groq  # type: ignore[import]
 from dotenv import load_dotenv  # type: ignore[import]
 
@@ -76,7 +77,16 @@ def extract_text(file_path: str) -> str:
             logger.error(f"PDF read error: {e}")
             raise
 
-    raise ValueError(f"Unsupported file type: {suffix}. Only .pdf and .txt are supported.")
+    if suffix == ".docx":
+        try:
+            doc = Document(str(path))
+            raw = "\n".join(paragraph.text for paragraph in doc.paragraphs)
+            return _clean_text(raw)
+        except Exception as e:
+            logger.error(f"DOCX read error: {e}")
+            raise
+
+    raise ValueError(f"Unsupported file type: {suffix}. Only .pdf, .docx, and .txt are supported.")
 
 
 def _clean_text(text: str) -> str:
@@ -409,8 +419,8 @@ def analyze_resume():
     try:
         file_bytes = base64.b64decode(file_content_b64)
         suffix = Path(file_name).suffix.lower() or ".pdf"
-        if suffix not in (".pdf", ".txt"):
-            return jsonify({"error": f"Unsupported file type: {suffix}. Only .pdf and .txt are supported."}), 415
+        if suffix not in (".pdf", ".docx", ".txt"):
+            return jsonify({"error": f"Unsupported file type: {suffix}. Only .pdf, .docx, and .txt are supported."}), 415
 
         with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp:
             tmp.write(file_bytes)

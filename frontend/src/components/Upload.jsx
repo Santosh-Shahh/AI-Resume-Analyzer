@@ -96,7 +96,7 @@ const Upload = ({ setAnalysisResult }) => {
                     }}
                 >
                     <Briefcase size={18} />
-                    {showJD ? 'Hide Job Description' : '🔥 Paste Job Description for JD Matching'}
+                    {showJD ? 'Hide Job Description' : 'Paste Job Description for JD Matching'}
                     {showJD ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                 </button>
 

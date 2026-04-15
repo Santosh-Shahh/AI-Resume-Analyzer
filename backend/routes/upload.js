@@ -60,14 +60,16 @@ router.post('/', upload.single('resume'), async (req, res) => {
                 fileContent: fileBase64,
                 fileName: req.file.originalname,
                 jobDescription: jobDescription || ''
-            }, { timeout: 60000 });
+            }, { timeout: 120000 });
 
             analysis = nlpResponse.data;
             console.log(`NLP analysis complete. Score: ${analysis.score}`);
         } catch (nlpError) {
             console.error('NLP service error:', nlpError.message);
-            return res.status(503).json({
-                message: 'Analysis service unavailable. Please try again later.',
+            const statusCode = nlpError.response ? nlpError.response.status : 503;
+            const errorMsg = nlpError.response?.data?.error || nlpError.response?.data?.message || 'Analysis service unavailable. Please try again later.';
+            return res.status(statusCode).json({
+                message: errorMsg,
                 error: nlpError.message
             });
         }
