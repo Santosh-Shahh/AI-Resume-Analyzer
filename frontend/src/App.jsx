@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { Sparkles, FileText, Shield, TrendingUp, ArrowRight, LogOut } from 'lucide-react';
+import Logo from './components/Logo';
 import Upload from './components/Upload';
 import Results from './components/Results';
 import Features from './components/Features';
@@ -65,7 +66,7 @@ function AppContent() {
               margin: 0,
               cursor: 'pointer'
             }}>
-            <Sparkles style={{ color: '#10b981' }} size={24} />
+            <Logo size={32} />
             AI Resume Analyzer
           </h1>
 
@@ -336,7 +337,7 @@ function AppContent() {
             gap: 24
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <Sparkles style={{ color: '#10b981' }} size={24} />
+              <Logo size={32} />
               <span style={{ fontSize: '1.25rem', fontWeight: 700, color: '#fff' }}>AI Resume Analyzer</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 24, fontSize: 14, color: '#94a3b8' }}>
