@@ -185,7 +185,7 @@ const Upload = ({ setAnalysisResult }) => {
                         <p style={{ fontSize: 14, color: '#64748b' }}>
                             {jobDescription.trim()
                                 ? 'Comparing against job description and running full analysis...'
-                                : 'Our AI is checking 16 factors. This takes about 60 seconds.'}
+                                : 'Our AI is checking 16 factors.'}
                         </p>
                     </div>
                 ) : (
