@@ -54,6 +54,7 @@ const Upload = ({ setAnalysisResult }) => {
             });
         } catch (error) {
             console.error('Error uploading file:', error);
+            setFileName('');
             const msg = error.response?.data?.message || error.response?.data?.error || error.message || 'Unknown error';
             alert(`Upload failed: ${msg}`);
         } finally {
