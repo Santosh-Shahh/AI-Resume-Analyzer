@@ -166,7 +166,6 @@ function AppContent() {
             <section className="section-light section-padding" style={{ paddingBottom: 32 }}>
               <div style={{ maxWidth: 900, margin: '0 auto', textAlign: 'center' }}>
                 <div className="badge-mint" style={{ marginBottom: 32 }}>
-                  <Sparkles size={16} />
                   <span>AI-Powered Resume Intelligence</span>
                 </div>
 
